@@ -9,7 +9,6 @@ import { getFeiShuPostByTemplate, logUtils, toFeiShu } from "./utils";
   await initConfig();
 
   const app = express();
-  const port = 1234;
 
   app.use(bodyParser());
   app.use(logMiddleware);
@@ -88,7 +87,9 @@ import { getFeiShuPostByTemplate, logUtils, toFeiShu } from "./utils";
   app.post("/", gitlabHook);
   app.post("/webhook/gitlab", gitlabHook);
 
-  app.listen(port, () => {
-    logUtils.all.info(`Service started successfully http://localhost:${port}`);
+  app.listen(getConfig().port, () => {
+    logUtils.all.info(
+      `Service started successfully http://localhost:${getConfig().port}`
+    );
   });
 })();
