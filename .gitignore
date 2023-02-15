@@ -1,0 +1,8 @@
+logs
+
+src/config/index.local.ts
+
+node_modules
+.idea
+.vscode
+dist
