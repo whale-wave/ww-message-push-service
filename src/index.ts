@@ -37,7 +37,7 @@ import { getFeiShuPostByTemplate, logUtils, toFeiShu } from "./utils";
           },
         ],
       ]);
-    } else if (hook_id && !head_commit && !repository && !commits) {
+    } else if (!head_commit && !repository && !commits) {
       result = toFeiShu(
         {
           title: "push",
