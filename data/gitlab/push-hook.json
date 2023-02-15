@@ -1,0 +1,11 @@
+{
+  "object_kind": "111",
+  "user_name": "layouwen",
+  "user_username": "avan",
+  "project": {
+    "name": "test",
+    "web_url": "https://gitlab.com/Layouwen/webhook-test",
+    "default_branch": "master"
+  },
+  "commits": []
+}
