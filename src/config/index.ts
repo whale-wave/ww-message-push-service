@@ -1,19 +1,16 @@
-import _ from "lodash";
+import _ from 'lodash';
+import config from './config';
 
-let config = {
-  webhooks: {
-    feiShu: [],
-  },
-};
+let _config = config;
 
 export const initConfig = async () => {
   try {
     // @ts-ignore
-    const { default: c } = await import("./index.local");
-    config = _.merge(config, c);
+    const {default: c} = await import('./config.local');
+    _config = _.merge(_config, c);
   } catch (e) {
-    console.log("不合并 local 文件");
+    console.log('不合并 local 文件');
   }
 };
 
-export const getConfig = () => config;
+export const getConfig = () => _config;

@@ -1,6 +1,6 @@
 logs
 
-src/config/index.local.ts
+src/config/config.local.ts
 
 node_modules
 .idea
