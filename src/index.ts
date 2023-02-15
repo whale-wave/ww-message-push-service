@@ -61,7 +61,7 @@ import { getFeiShuPostByTemplate, logUtils, toFeiShu } from "./utils";
     res.send("ok");
   });
 
-  app.post("/", async (req, res) => {
+  const gitlabHook = async (req: any, res: any) => {
     const { object_kind, user_name, user_username, project, commits } =
       req.body;
     const result = toFeiShu(
@@ -83,7 +83,10 @@ import { getFeiShuPostByTemplate, logUtils, toFeiShu } from "./utils";
       logUtils.daily.info("gitlab to fei shu result", data);
     }
     res.send("success");
-  });
+  };
+
+  app.post("/", gitlabHook);
+  app.post("/webhook/gitlab", gitlabHook);
 
   app.listen(port, () => {
     logUtils.all.info(`Service started successfully http://localhost:${port}`);
