@@ -10,12 +10,19 @@ interface ToFeiShuData {
   commits: { id: string; url: string; message: string }[];
 }
 
-export function toFeiShu(
-  data: ToFeiShuData,
-  platform = "unknown" as "gitlab" | "gitee" | "github" | "unknown"
+type Platform = "gitlab" | "gitee" | "github" | "unknown";
+
+export function getFeiShuPostByTemplate(
+  title: string,
+  platform: Platform,
+  project: {
+    name: string;
+    url: string;
+    branch: string;
+  },
+  content: any[]
 ) {
-  const { title, user_name, user_username, project, commits } = data;
-  const gitlabResult = {
+  return {
     msg_type: "post",
     content: {
       post: {
@@ -55,29 +62,37 @@ export function toFeiShu(
                 text: `分支: ${project.branch}`,
               },
             ],
-            [
-              {
-                tag: "text",
-                text: "操作人: ",
-              },
-              {
-                tag: "text",
-                text: `${user_name}(${user_username})`,
-              },
-            ],
-            [
-              {
-                tag: "text",
-                text: "提交信息:",
-              },
-            ],
+            ...content,
           ],
         },
       },
     },
   };
+}
+
+export function toFeiShu(data: ToFeiShuData, platform = "unknown" as Platform) {
+  const { title, user_name, user_username, project, commits } = data;
+  const result = getFeiShuPostByTemplate(title, platform, project, [
+    [
+      {
+        tag: "text",
+        text: "操作人: ",
+      },
+      {
+        tag: "text",
+        text: `${user_name}(${user_username})`,
+      },
+    ],
+    [
+      {
+        tag: "text",
+        text: "提交信息:",
+      },
+    ],
+  ]);
+
   commits.forEach((commit: any) => {
-    gitlabResult.content.post.zh_cn.content.push([
+    result.content.post.zh_cn.content.push([
       {
         tag: "a",
         text: `${commit.id.slice(0, 6)} `,
@@ -89,5 +104,5 @@ export function toFeiShu(
       },
     ]);
   });
-  return gitlabResult;
+  return result;
 }

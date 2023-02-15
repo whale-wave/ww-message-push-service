@@ -3,7 +3,7 @@ import express from "express";
 import bodyParser from "body-parser";
 import { initConfig, getConfig } from "./config";
 import logMiddleware from "./middleware/logMiddleware";
-import { logUtils, toFeiShu } from "./utils";
+import { getFeiShuPostByTemplate, logUtils, toFeiShu } from "./utils";
 
 !(async () => {
   await initConfig();
@@ -19,23 +19,42 @@ import { logUtils, toFeiShu } from "./utils";
   });
 
   app.post("/webhook/github", async (req, res) => {
-    const { head_commit, commits, repository } = req.body;
+    const { head_commit, commits, repository, hook_id } = req.body;
 
-    for (const url of getConfig().webhooks.feiShu) {
-      const result = toFeiShu(
+    let result: any = null;
+
+    const project = {
+      name: repository.name,
+      url: repository.html_url,
+      branch: repository.default_branch,
+    };
+
+    if (hook_id && repository) {
+      result = getFeiShuPostByTemplate("update", "gitlab", project, [
+        [
+          {
+            tag: "text",
+            text: "webhook update",
+          },
+        ],
+      ]);
+    } else if (hook_id && !head_commit && !repository && !commits) {
+      result = toFeiShu(
         {
           title: "push",
+          project,
           user_name: head_commit.author.name,
           user_username: head_commit.author.username,
-          project: {
-            name: repository.name,
-            url: repository.url,
-            branch: repository.default_branch,
-          },
           commits,
         },
         "github"
       );
+    } else {
+      logUtils.daily.info("github no support type", req.body);
+      return res.send("no support");
+    }
+
+    for (const url of getConfig().webhooks.feiShu) {
       const { data } = await axios.post(url, result);
       logUtils.daily.info("github to fei shu result", data);
     }
