@@ -61,7 +61,7 @@ import { getFeiShuPostByTemplate, logUtils, toFeiShu } from "./utils";
   });
 
   const gitlabHook = async (req: any, res: any) => {
-    const { object_kind, user_name, user_username, project, commits } =
+    const { object_kind, ref, user_name, user_username, project, commits } =
       req.body;
     const kindToTitle = {
       push: "推送commit",
@@ -76,7 +76,7 @@ import { getFeiShuPostByTemplate, logUtils, toFeiShu } from "./utils";
         project: {
           name: project.name,
           url: project.web_url,
-          branch: project.default_branch,
+          branch: ref.replace('refs/heads/', ''),
         },
         commits,
       },
