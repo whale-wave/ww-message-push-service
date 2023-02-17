@@ -63,9 +63,14 @@ import { getFeiShuPostByTemplate, logUtils, toFeiShu } from "./utils";
   const gitlabHook = async (req: any, res: any) => {
     const { object_kind, user_name, user_username, project, commits } =
       req.body;
+    const kindToTitle = {
+      push: "推送commit",
+      tag_push: "推送标签",
+    } as any;
+
     const result = toFeiShu(
       {
-        title: object_kind,
+        title: kindToTitle[object_kind] || object_kind,
         user_name,
         user_username,
         project: {
