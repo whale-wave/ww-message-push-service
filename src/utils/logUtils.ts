@@ -1,5 +1,5 @@
-import * as fs from "fs";
-import * as log4js from "log4js";
+import fs from "fs";
+import log4js from "log4js";
 import path from "path";
 
 export class LogUtils {

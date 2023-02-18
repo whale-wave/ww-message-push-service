@@ -76,7 +76,7 @@ import { getFeiShuPostByTemplate, logUtils, toFeiShu } from "./utils";
         project: {
           name: project.name,
           url: project.web_url,
-          branch: ref.replace('refs/heads/', ''),
+          branch: ref.replace("refs/heads/", ""),
         },
         commits,
       },
