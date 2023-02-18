@@ -4,6 +4,7 @@
 node_modules
 dist
 deploy
+coverage
 
 logs
 src/config/config.local.ts
