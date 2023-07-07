@@ -1,23 +1,23 @@
-import axios from "axios";
-import express from "express";
-import bodyParser from "body-parser";
-import { initConfig, getConfig } from "./config";
-import logMiddleware from "./middleware/logMiddleware";
-import { getFeiShuPostByTemplate, logUtils, toFeiShu } from "./utils";
+import axios from 'axios';
+import express from 'express';
+import bodyParser from 'body-parser';
+import { initConfig, getConfig } from './config';
+import { loggerMiddleware } from './middleware';
+import { getFeiShuPostByTemplate, logger, toFeiShu } from './utils';
 
 !(async () => {
   await initConfig();
 
   const app = express();
 
-  app.use(bodyParser());
-  app.use(logMiddleware);
+  app.use(bodyParser.json());
+  app.use(loggerMiddleware);
 
-  app.get("/", (req, res) => {
-    res.send("hello! I am Avan.");
+  app.get('/', (req, res) => {
+    res.send('hello! I am Avan.');
   });
 
-  app.post("/webhook/github", async (req, res) => {
+  app.post('/webhook/github', async (req, res) => {
     const { head_commit, commits, repository, hook_id } = req.body;
 
     let result: any = null;
@@ -29,40 +29,39 @@ import { getFeiShuPostByTemplate, logUtils, toFeiShu } from "./utils";
     };
 
     if (hook_id && repository) {
-      result = getFeiShuPostByTemplate("update", "gitlab", project, [
+      result = getFeiShuPostByTemplate('update', 'gitlab', project, [
         [
           {
-            tag: "text",
-            text: "webhook update",
+            tag: 'text',
+            text: 'webhook update',
           },
         ],
       ]);
     } else if (head_commit && repository && commits) {
       result = toFeiShu(
         {
-          title: "push",
+          title: 'push',
           project,
           user_name: head_commit.author.name,
           user_username: head_commit.author.username,
           commits,
         },
-        "github"
+        'github'
       );
     } else {
-      logUtils.daily.info("github no support type", req.body);
-      return res.send("no support");
+      logger.daily.info('github no support type', req.body);
+      return res.send('no support');
     }
 
     for (const url of getConfig().webhooks.feiShu) {
       const { data } = await axios.post(url, result);
-      logUtils.daily.info("github to fei shu result", data);
+      logger.daily.info('github to fei shu result', data);
     }
-    res.send("ok");
+    res.send('ok');
   });
 
   const gitlabHook = async (req: any, res: any) => {
-    const { object_kind, ref, user_name, user_username, project, commits } =
-      req.body;
+    const { object_kind, ref, user_name, user_username, project, commits } = req.body;
     const result = toFeiShu(
       {
         title: object_kind,
@@ -75,21 +74,19 @@ import { getFeiShuPostByTemplate, logUtils, toFeiShu } from "./utils";
         },
         commits,
       },
-      "gitlab"
+      'gitlab'
     );
     for (const url of getConfig().webhooks.feiShu) {
       const { data } = await axios.post(url, result);
-      logUtils.daily.info("gitlab to fei shu result", data);
+      logger.daily.info('gitlab to fei shu result', data);
     }
-    res.send("success");
+    res.send('success');
   };
 
-  app.post("/", gitlabHook);
-  app.post("/webhook/gitlab", gitlabHook);
+  app.post('/', gitlabHook);
+  app.post('/webhook/gitlab', gitlabHook);
 
   app.listen(getConfig().port, () => {
-    logUtils.all.info(
-      `Service started successfully http://localhost:${getConfig().port}`
-    );
+    logger.daily.info(`Service started successfully http://localhost:${getConfig().port}`);
   });
 })();

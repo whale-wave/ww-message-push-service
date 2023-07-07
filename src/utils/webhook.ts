@@ -10,7 +10,7 @@ interface ToFeiShuData {
   commits: { id: string; url: string; message: string }[];
 }
 
-type Platform = "gitlab" | "gitee" | "github" | "unknown";
+type Platform = 'gitlab' | 'gitee' | 'github' | 'unknown';
 
 export function getFeiShuPostByTemplate(
   title: string,
@@ -23,7 +23,7 @@ export function getFeiShuPostByTemplate(
   content: any[]
 ) {
   return {
-    msg_type: "post",
+    msg_type: 'post',
     content: {
       post: {
         zh_cn: {
@@ -31,34 +31,34 @@ export function getFeiShuPostByTemplate(
           content: [
             [
               {
-                tag: "at",
-                user_id: "all",
+                tag: 'at',
+                user_id: 'all',
               },
             ],
             [
               {
-                tag: "text",
-                text: "平台: ",
+                tag: 'text',
+                text: '平台: ',
               },
               {
-                tag: "text",
+                tag: 'text',
                 text: platform,
               },
             ],
             [
               {
-                tag: "text",
-                text: "仓库: ",
+                tag: 'text',
+                text: '仓库: ',
               },
               {
-                tag: "a",
+                tag: 'a',
                 text: project.name,
                 href: project.url,
               },
             ],
             [
               {
-                tag: "text",
+                tag: 'text',
                 text: `分支: ${project.branch}`,
               },
             ],
@@ -70,23 +70,23 @@ export function getFeiShuPostByTemplate(
   };
 }
 
-export function toFeiShu(data: ToFeiShuData, platform = "unknown" as Platform) {
+export function toFeiShu(data: ToFeiShuData, platform = 'unknown' as Platform) {
   const { title, user_name, user_username, project, commits } = data;
   const result = getFeiShuPostByTemplate(title, platform, project, [
     [
       {
-        tag: "text",
-        text: "操作人: ",
+        tag: 'text',
+        text: '操作人: ',
       },
       {
-        tag: "text",
+        tag: 'text',
         text: `${user_name}(${user_username})`,
       },
     ],
     [
       {
-        tag: "text",
-        text: "提交信息:",
+        tag: 'text',
+        text: '提交信息:',
       },
     ],
   ]);
@@ -94,12 +94,12 @@ export function toFeiShu(data: ToFeiShuData, platform = "unknown" as Platform) {
   commits.forEach((commit: any) => {
     result.content.post.zh_cn.content.push([
       {
-        tag: "a",
+        tag: 'a',
         text: `${commit.id.slice(0, 6)} `,
         href: commit.url,
       },
       {
-        tag: "text",
+        tag: 'text',
         text: commit.message,
       },
     ]);
