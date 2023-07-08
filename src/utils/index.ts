@@ -17,7 +17,7 @@ export function merge(a: any, b: any) {
 type GitMsgData = {
   type: string;
   platform: string;
-  repo: { url: string; name: string };
+  repo: { url: string; name: string; branch: string };
   user: string;
   commits: { url: string; no: string; note: string }[];
 };
@@ -25,8 +25,9 @@ type GitMsgData = {
 function getTelegramMessage({ type, platform, repo, user, commits }: GitMsgData) {
   return `*${type}*
 平台: ${platform}
+分支: ${repo.branch}
 仓库: [${repo.name}](${repo.url})
-用户: ${user}
+操作人: ${user}
 提交信息:
 ${commits
   .map(commit => {
