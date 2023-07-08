@@ -1,3 +1,4 @@
+import { telegramService } from '../services';
 import { Request, Response } from 'express';
 import { SuccessResponse, ErrorResponse, logger, toFeiShu, getFeiShuPostByTemplate } from '../utils';
 import axios from 'axios';
@@ -63,16 +64,61 @@ class WebhookController {
         },
         'github'
       );
+
+      function getGitText({
+        type,
+        platform,
+        repo,
+        user,
+        commits,
+      }: {
+        type: string;
+        platform: string;
+        repo: { url: string; name: string };
+        user: string;
+        commits: { url: string; no: string; note: string }[];
+      }) {
+        return `*${type}*
+平台: ${platform}
+仓库: [${repo.name}](${repo.url})
+用户: ${user}
+提交信息:
+${commits
+  .map(commit => {
+    return `[${commit.no}](${commit.url}) ${commit.note}`;
+  })
+  .join('\n')}`;
+      }
+
+      await telegramService.sendMessage(
+        getGitText({
+          type: 'push',
+          platform: 'github',
+          repo: {
+            url: repository.html_url,
+            name: repository.name,
+          },
+          user: head_commit.author.name,
+          commits: commits.map((commit: any) => {
+            return {
+              url: commit.url,
+              no: commit.id.slice(0, 6),
+              note: commit.message,
+            };
+          }),
+        }).replaceAll('-', '\\-')
+      );
     } else {
       logger.daily.info('github no support type', req.body);
-      return res.send('no support');
+      return res.json(new ErrorResponse({ message: 'no support' }));
     }
 
     for (const url of config.webhooks.feiShu) {
       const { data } = await axios.post(url, result);
       logger.daily.info('github to fei shu result', data);
     }
-    res.json(new ErrorResponse());
+
+    res.json(new SuccessResponse());
   }
 }
 

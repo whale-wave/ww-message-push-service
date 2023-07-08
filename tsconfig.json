@@ -8,7 +8,11 @@
     "baseUrl": "./src",
     "esModuleInterop": true,
     "strict": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "lib": [
+      "es2021",
+      "dom"
+    ]
   },
   "exclude": [
     "node_modules",

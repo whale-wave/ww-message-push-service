@@ -13,7 +13,7 @@ import config from './config';
   const app = express();
 
   app.use(bodyParser.json());
-  app.use(loggerMiddleware);
+  app.use(loggerMiddleware(logger));
 
   initRoute(app);
 
