@@ -28,7 +28,7 @@ jobs:
           port: ${{ secrets.PORT }}
           script: |
             cd ./whale-wave/ww-message-push-service
-            git pull
-            npm install
-            npm run build
+            git pull origin master
+            pnpm install
+            pnpm build
             pm2 restart ww-message-push-service
