@@ -12,6 +12,27 @@ class WebhookController {
       tag_push: '推送标签',
     } as any;
 
+    await telegramService.sendMessage(
+      getGitText({
+        data: {
+          type: kindToTitle[object_kind] || object_kind,
+          platform: 'gitlab',
+          repo: {
+            url: project.web_url,
+            name: project.name,
+          },
+          user: user_name,
+          commits: commits.map((commit: any) => {
+            return {
+              url: commit.url,
+              no: commit.id.slice(0, 6),
+              note: commit.message,
+            };
+          }),
+        },
+      })
+    );
+
     const result = toFeiShu(
       {
         title: kindToTitle[object_kind] || object_kind,
