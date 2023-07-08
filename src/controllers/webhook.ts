@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { SuccessResponse, ErrorResponse, logger, toFeiShu, getFeiShuPostByTemplate } from '../utils';
 import axios from 'axios';
-import { getConfig } from 'config';
+import config from '../config';
 
 class WebhookController {
   async gitlab(req: Request, res: Response) {
@@ -25,7 +25,7 @@ class WebhookController {
       },
       'gitlab'
     );
-    for (const url of getConfig().webhooks.feiShu) {
+    for (const url of config.webhooks.feiShu) {
       const { data } = await axios.post(url, result);
       logger.daily.info('gitlab to fei shu result', data);
     }
@@ -68,7 +68,7 @@ class WebhookController {
       return res.send('no support');
     }
 
-    for (const url of getConfig().webhooks.feiShu) {
+    for (const url of config.webhooks.feiShu) {
       const { data } = await axios.post(url, result);
       logger.daily.info('github to fei shu result', data);
     }
