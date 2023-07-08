@@ -22,7 +22,10 @@ class WebhookController {
             name: project.name,
             branch: ref.replace('refs/heads/', ''),
           },
-          user: user_name,
+          user: {
+            name: user_name,
+            username: user_username,
+          },
           commits: commits.map((commit: any) => {
             return {
               url: commit.url,
@@ -98,7 +101,10 @@ class WebhookController {
                 name: repository.name,
                 branch: project.branch,
               },
-              user: head_commit.author.name,
+              user: {
+                name: head_commit.author.name,
+                username: head_commit.author.username,
+              },
               commits: commits.map((commit: any) => {
                 return {
                   url: commit.url,
