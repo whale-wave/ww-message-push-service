@@ -3,6 +3,7 @@ import _ from 'lodash';
 export * from './logger';
 export * from './webhook';
 export * from './response';
+export * from './request';
 
 function mergeOption(objValue: any, srcValue: any) {
   if (_.isArray(objValue)) {
