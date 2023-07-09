@@ -64,7 +64,7 @@ type Activity = {
   realSignUrl: string;
 };
 
-schedule.scheduleJob('0 8 * * * *', async () => {
+schedule.scheduleJob('0 0 8 * * *', async () => {
   const newsetRes: GetNewestResponse = await request.get(
     `https://segmentfault.com/gateway/events?query=newest&city=440100`
   );
