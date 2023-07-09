@@ -8,7 +8,7 @@ import { webhookController } from './controllers';
 import config from './config';
 import schedule from 'node-schedule';
 import dayjs from 'dayjs';
-import { telegramService } from './services';
+import { feishuService, telegramService } from './services';
 
 !(async () => {
   await initConfig();
@@ -82,7 +82,7 @@ schedule.scheduleJob('0 8 * * * *', async () => {
     });
   });
 
-  function getActivitiesTelegram(activity: Activity) {
+  function getActivitiesTelegramText(activity: Activity) {
     return `活动名称: ${activity.name}
 活动地点: ${activity.address}
 活动时间: ${dayjs(activity.start * 1000).format('YYYY-MM-DD HH:mm')} - ${dayjs(activity.end * 1000).format(
@@ -94,9 +94,80 @@ schedule.scheduleJob('0 8 * * * *', async () => {
     )}
 报名链接: [点击跳转](${activity.realSignUrl})`.replace(/[-.=]/g, '\\$&');
   }
+
+  function getActivitiesFeishuContent(activity: Activity) {
+    return [
+      [
+        {
+          tag: 'text',
+          text: `活动名称: ${activity.name}`,
+        },
+      ],
+      [
+        {
+          tag: 'text',
+          text: `活动地点: ${activity.address}`,
+        },
+      ],
+      [
+        {
+          tag: 'text',
+          text: `活动时间: ${dayjs(activity.start * 1000).format('YYYY-MM-DD HH:mm')} - ${dayjs(
+            activity.end * 1000
+          ).format('YYYY-MM-DD HH:mm')}`,
+        },
+      ],
+      [
+        {
+          tag: 'text',
+          text: '活动链接: ',
+        },
+        {
+          tag: 'a',
+          text: '点击跳转',
+          href: activity.url,
+        },
+      ],
+      [
+        {
+          tag: 'text',
+          text: `报名时间: ${dayjs(activity.signStart * 1000).format('YYYY-MM-DD HH:mm')} - ${dayjs(
+            activity.signEnd * 1000
+          ).format('YYYY-MM-DD HH:mm')}`,
+        },
+      ],
+      [
+        {
+          tag: 'text',
+          text: '报名链接: ',
+        },
+        {
+          tag: 'a',
+          text: '点击跳转',
+          href: activity.realSignUrl,
+        },
+      ],
+    ];
+  }
+
+  // TODO: 暂时不发飞书
+  // try {
+  //   const feishuSendMsgArr = await feishuService.sendMessage({
+  //     title: '活动推荐',
+  //     content: activities.reduce((result, activity, index) => {
+  //       if (index !== 0) return [...result, [], ...getActivitiesFeishuContent(activity)];
+  //       return [...result, ...getActivitiesFeishuContent(activity)];
+  //     }, [] as any[]),
+  //   });
+
+  //   logger.daily.info('schedule job newset feishu send message res', feishuSendMsgArr);
+  // } catch (e) {
+  //   logger.error.error('schedule job newset feishu send message error', e);
+  // }
+
   try {
     let message = '*活动推荐*\n\n';
-    message += activities.map(activity => getActivitiesTelegram(activity)).join('\n\n');
+    message += activities.map(activity => getActivitiesTelegramText(activity)).join('\n\n');
     const sendRes = await telegramService.sendMessage(message);
     logger.daily.info('schedule job newset res', sendRes);
   } catch (e) {
