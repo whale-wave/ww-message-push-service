@@ -154,10 +154,13 @@ schedule.scheduleJob('0 8 * * * *', async () => {
   // try {
   //   const feishuSendMsgArr = await feishuService.sendMessage({
   //     title: '活动推荐',
-  //     content: activities.reduce((result, activity, index) => {
-  //       if (index !== 0) return [...result, [], ...getActivitiesFeishuContent(activity)];
-  //       return [...result, ...getActivitiesFeishuContent(activity)];
-  //     }, [] as any[]),
+  //     content: [
+  //       [{ tag: 'at', user_id: 'all' }],
+  //       ...activities.reduce((result, activity, index) => {
+  //         if (index !== 0) return [...result, [], ...getActivitiesFeishuContent(activity)];
+  //         return [...result, ...getActivitiesFeishuContent(activity)];
+  //       }, [] as any[]),
+  //     ],
   //   });
 
   //   logger.daily.info('schedule job newset feishu send message res', feishuSendMsgArr);
