@@ -29,15 +29,15 @@ type GitMsgData = {
 function getTelegramMessage({ type, platform, repo, user, commits }: GitMsgData) {
   return `*${type}*
 平台: ${platform}
-仓库: [${repo.name}](${repo.url})
+仓库: [${repo.name}](${replaceStr(repo.url)})
 分支: ${repo.branch}
-操作人: ${user.name}(${user.username})
+操作人: ${user.name}\\(${user.username}\\)
 提交信息:
 ${commits
   .map(commit => {
-    return `[${commit.no}](${commit.url}) ${commit.note}`;
+    return `[${commit.no}](${replaceStr(commit.url)}) ${replaceStr(commit.note)}`;
   })
-  .join('\n')}`.replaceAll('-', '\\-');
+  .join('')}`;
 }
 
 export function getGitText({ data, target = 'telegram' }: { data: GitMsgData; target?: 'telegram' }) {
@@ -47,4 +47,16 @@ export function getGitText({ data, target = 'telegram' }: { data: GitMsgData; ta
     default:
       return '';
   }
+}
+
+export function toViewJsonStr(obj: any) {
+  return JSON.stringify(obj, null, 2);
+}
+
+export function replaceStr(str: string) {
+  return str.replace(/[-=.())]/g, '\\$&');
+}
+
+export function replaceStrNoKongGe(str: string) {
+  return str.replace(/[-=.]/g, '\\$&');
 }
