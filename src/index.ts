@@ -24,7 +24,7 @@ import { feishuService, telegramService } from './services';
     res.send('hello! I am Avan.');
   });
 
-  app.post('/', webhookController.github);
+  app.post('/', webhookController.gitlab);
   app.post('/webhook/github', webhookController.github);
   app.post('/webhook/gitlab', webhookController.gitlab);
 
