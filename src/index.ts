@@ -65,6 +65,7 @@ type Activity = {
 };
 
 schedule.scheduleJob('0 0 8 * * *', async () => {
+// schedule.scheduleJob('*/5 * * * * *', async () => {
   const newsetRes: GetNewestResponse = await request.get(
     `https://segmentfault.com/gateway/events?query=newest&city=440100`
   );
@@ -83,19 +84,6 @@ schedule.scheduleJob('0 0 8 * * *', async () => {
   });
 
   function getActivitiesTelegramText(activity: Activity) {
-    return `活动名称: ${replaceStr(activity.name)}
-活动地点: ${replaceStr(activity.address)}
-活动时间: ${replaceStr(dayjs(activity.start * 1000).format('YYYY-MM-DD HH:mm'))} \\- ${replaceStr(
-      dayjs(activity.end * 1000).format('YYYY-MM-DD HH:mm')
-    )}
-活动链接: [点击跳转](${replaceStr(activity.url)})
-报名时间: ${replaceStr(dayjs(activity.signStart * 1000).format('YYYY-MM-DD HH:mm'))} \\- ${replaceStr(
-      dayjs(activity.signEnd * 1000).format('YYYY-MM-DD HH:mm')
-    )}
-报名链接: [点击跳转](${replaceStr(activity.realSignUrl)})`;
-  }
-
-  function getActivitiesTelegramText1(activity: Activity) {
     return replaceStrNoKongGe(`活动名称: ${activity.name}
 活动地点: ${activity.address}
 活动时间: ${dayjs(activity.start * 1000).format('YYYY-MM-DD HH:mm')} - ${dayjs(activity.end * 1000).format(
@@ -184,13 +172,7 @@ schedule.scheduleJob('0 0 8 * * *', async () => {
   try {
     let message = '*活动推荐*\n\n';
     message += activities.map(activity => getActivitiesTelegramText(activity)).join('\n\n');
-    let message2 = '*活动推荐*\n\n';
-    message2 += activities.map(activity => getActivitiesTelegramText1(activity)).join('\n\n');
-    console.log('======');
-    console.log(message);
-    console.log(message2);
-    console.log('======');
-    const sendRes = await telegramService.sendMessage(message2);
+    const sendRes = await telegramService.sendMessage(message);
     logger.daily.info('schedule job newset res', sendRes);
   } catch (e) {
     logger.error.error('schedule job newset error', e);
