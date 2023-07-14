@@ -29,9 +29,9 @@ type GitMsgData = {
 function getTelegramMessage({ type, platform, repo, user, commits }: GitMsgData) {
   return `*${type}*
 平台: ${platform}
-仓库: [${repo.name}](${replaceStr(repo.url)})
-分支: ${repo.branch}
-操作人: ${user.name}\\(${user.username}\\)
+仓库: [${replaceStr(repo.name)}](${replaceStr(repo.url)})
+分支: ${replaceStr(repo.branch)}
+操作人: ${replaceStr(`${user.name}(${user.username})`)}
 提交信息:
 ${commits
   .map(commit => {
