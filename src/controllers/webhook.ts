@@ -60,18 +60,18 @@ class WebhookController {
 
   async github(req: Request, res: Response) {
     try {
-      const { head_commit, commits, repository, hook_id } = req.body;
+      const { head_commit, commits, repository, hook_id, ref } = req.body;
 
       let result: any = null;
 
       const project = {
         name: repository.name,
         url: repository.html_url,
-        branch: repository.default_branch,
+        branch: ref.replace('refs/heads/', '')
       };
 
       if (hook_id && repository) {
-        result = getFeiShuPostByTemplate('update', 'gitlab', project, [
+        result = getFeiShuPostByTemplate('update', 'github', project, [
           [
             {
               tag: 'text',
