@@ -1,5 +1,7 @@
+import { GitMessageTemplate } from '../controllers';
 import axios, { AxiosInstance } from 'axios';
 import config from '../config';
+import { replaceStr } from '../utils';
 
 type SendMessageApi = { chat_id: string; text: string; parse_mode?: 'MarkdownV2' | 'HTML' };
 type SendMessageApiResponse = {
@@ -50,6 +52,20 @@ class TelegramService {
       [] as Promise<SendMessageApiResponse>[]
     );
     return Promise.all(reqArr);
+  }
+
+  getGitTextByGitMessageTemplate(gitMessageTemplate: GitMessageTemplate) {
+    return `*${replaceStr(gitMessageTemplate.type)}*
+*平台*: ${replaceStr(gitMessageTemplate.platform)}
+*仓库*: [${replaceStr(gitMessageTemplate.repo.name)}](${replaceStr(gitMessageTemplate.repo.url)})
+*分支*: ${replaceStr(gitMessageTemplate.branch)}
+*操作人*: ${replaceStr(`${gitMessageTemplate.user.name}(${gitMessageTemplate.user.username})`)}
+*提交信息*:
+${gitMessageTemplate.commits
+  .map(commit => {
+    return `[${replaceStr(commit.no)}](${replaceStr(commit.url)}) ${replaceStr(commit.note)}`;
+  })
+  .join('')}`;
   }
 }
 

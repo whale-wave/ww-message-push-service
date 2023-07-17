@@ -1,4 +1,4 @@
-import { telegramService } from '../services';
+import { telegramService, CodeupMessageRaw, codeupService, feishuService } from '../services';
 import { Request, Response } from 'express';
 import { SuccessResponse, ErrorResponse, logger, toFeiShu, getFeiShuPostByTemplate, getGitText } from '../utils';
 import axios from 'axios';
@@ -67,7 +67,7 @@ class WebhookController {
       const project = {
         name: repository.name,
         url: repository.html_url,
-        branch: ref.replace('refs/heads/', '')
+        branch: ref.replace('refs/heads/', ''),
       };
 
       if (hook_id && repository) {
@@ -132,6 +132,42 @@ class WebhookController {
       res.json(new ErrorResponse({ message: 'catch error' }));
     }
   }
+
+  async codeup(req: Request, res: Response) {
+    const { body: raw }: { body: CodeupMessageRaw } = req;
+
+    const githubMessageTemplate = codeupService.getGithubMessageTemplate(raw);
+
+    const feishuContent = feishuService.getGitContentByGitMessageTemplate(githubMessageTemplate);
+    feishuService.sendMessage({
+      title: githubMessageTemplate.type,
+      content: feishuContent,
+    });
+
+    const telegramText = telegramService.getGitTextByGitMessageTemplate(githubMessageTemplate);
+    telegramService.sendMessage(telegramText);
+
+    res.json(new SuccessResponse());
+  }
+}
+
+export interface GitMessageTemplate {
+  type: string;
+  platform: string;
+  repo: {
+    url: string;
+    name: string;
+  };
+  branch: string;
+  user: {
+    name: string;
+    username: string;
+  };
+  commits: {
+    url: string;
+    no: string;
+    note: string;
+  }[];
 }
 
 export const webhookController = new WebhookController();
