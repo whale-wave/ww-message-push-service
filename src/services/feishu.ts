@@ -1,6 +1,8 @@
 import { request } from '../utils';
 import config from '../config';
 import { GitMessageTemplate } from '../controllers';
+import { Activity } from './telegram';
+import dayjs from 'dayjs';
 
 interface SendMessageFeishuApi {
   msg_type: 'post';
@@ -37,6 +39,7 @@ class FeishuService {
     return request.post(url, data);
   }
 
+  // git 通知
   getGitContentByGitMessageTemplate(gitMessageTemplate: GitMessageTemplate) {
     return [
       [{ tag: 'at', user_id: 'all' }],
@@ -63,6 +66,47 @@ class FeishuService {
           { tag: 'text', text: commit.note },
         ];
       }),
+    ];
+  }
+
+  // 活动推荐
+  getActivityContentByActivity(activity: Activity) {
+    return [
+      [{ tag: 'text', text: `活动名称: ${activity.name}` }],
+      [{ tag: 'text', text: `活动地点: ${activity.address}` }],
+      [
+        {
+          tag: 'text',
+          text: `活动时间: ${dayjs(activity.start * 1000).format('YYYY-MM-DD HH:mm')} - ${dayjs(
+            activity.end * 1000
+          ).format('YYYY-MM-DD HH:mm')}`,
+        },
+      ],
+      [
+        { tag: 'text', text: '活动链接: ' },
+        { tag: 'a', text: '点击跳转', href: activity.url },
+      ],
+      [
+        {
+          tag: 'text',
+          text: `报名时间: ${dayjs(activity.signStart * 1000).format('YYYY-MM-DD HH:mm')} - ${dayjs(
+            activity.signEnd * 1000
+          ).format('YYYY-MM-DD HH:mm')}`,
+        },
+      ],
+      [
+        { tag: 'text', text: '报名链接: ' },
+        { tag: 'a', text: '点击跳转', href: activity.realSignUrl },
+      ],
+    ];
+  }
+  getActivitiesContentByActivities(activities: Activity[]) {
+    return [
+      [{ tag: 'at', user_id: 'all' }],
+      ...activities.reduce((result, activity, index) => {
+        if (index !== 0) return [...result, [], ...this.getActivityContentByActivity(activity)];
+        return [...result, ...this.getActivityContentByActivity(activity)];
+      }, [] as any[]),
     ];
   }
 }

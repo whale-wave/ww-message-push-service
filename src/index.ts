@@ -3,12 +3,11 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import { initConfig } from './config';
 import { loggerMiddleware } from './middleware';
-import { logger, replaceStr, replaceStrNoKongGe, request, toViewJsonStr } from './utils';
+import { logger, request } from './utils';
 import { webhookController } from './controllers';
 import config from './config';
 import schedule from 'node-schedule';
-import dayjs from 'dayjs';
-import { feishuService, telegramService } from './services';
+import { Activity, feishuService, telegramService } from './services';
 
 !(async () => {
   await initConfig();
@@ -20,7 +19,7 @@ import { feishuService, telegramService } from './services';
 
   initRoute(app);
 
-  app.get('/', (req, res) => {
+  app.get('/', (_, res) => {
     res.send('hello! I am Avan.');
   });
 
@@ -53,19 +52,10 @@ type GetNewestResponse = {
   size: number;
 };
 
-type Activity = {
-  name: string;
-  address: string;
-  start: number;
-  end: number;
-  signStart: number;
-  signEnd: number;
-  url: string;
-  realSignUrl: string;
-};
-
 schedule.scheduleJob('0 0 8 * * *', async () => {
-// schedule.scheduleJob('*/5 * * * * *', async () => {
+  // schedule.scheduleJob('*/5 * * * * *', async () => {
+  if (!config.schedule.newset.enable) return;
+
   const newsetRes: GetNewestResponse = await request.get(
     `https://segmentfault.com/gateway/events?query=newest&city=440100`
   );
@@ -83,95 +73,19 @@ schedule.scheduleJob('0 0 8 * * *', async () => {
     });
   });
 
-  function getActivitiesTelegramText(activity: Activity) {
-    return replaceStrNoKongGe(`活动名称: ${activity.name}
-活动地点: ${activity.address}
-活动时间: ${dayjs(activity.start * 1000).format('YYYY-MM-DD HH:mm')} - ${dayjs(activity.end * 1000).format(
-      'YYYY-MM-DD HH:mm'
-    )}
-活动链接: [点击跳转](${activity.url})
-报名时间: ${dayjs(activity.signStart * 1000).format('YYYY-MM-DD HH:mm')} - ${dayjs(activity.signEnd * 1000).format(
-      'YYYY-MM-DD HH:mm'
-    )}
-报名链接: [点击跳转](${activity.realSignUrl})`);
+  try {
+    const feishuSendMsgArr = await feishuService.sendMessage({
+      title: '活动推荐',
+      content: feishuService.getActivitiesContentByActivities(activities),
+    });
+
+    logger.daily.info('schedule job newset feishu send message res', feishuSendMsgArr);
+  } catch (e) {
+    logger.error.error('schedule job newset feishu send message error', e);
   }
-
-  function getActivitiesFeishuContent(activity: Activity) {
-    return [
-      [
-        {
-          tag: 'text',
-          text: `活动名称: ${activity.name}`,
-        },
-      ],
-      [
-        {
-          tag: 'text',
-          text: `活动地点: ${activity.address}`,
-        },
-      ],
-      [
-        {
-          tag: 'text',
-          text: `活动时间: ${dayjs(activity.start * 1000).format('YYYY-MM-DD HH:mm')} - ${dayjs(
-            activity.end * 1000
-          ).format('YYYY-MM-DD HH:mm')}`,
-        },
-      ],
-      [
-        {
-          tag: 'text',
-          text: '活动链接: ',
-        },
-        {
-          tag: 'a',
-          text: '点击跳转',
-          href: activity.url,
-        },
-      ],
-      [
-        {
-          tag: 'text',
-          text: `报名时间: ${dayjs(activity.signStart * 1000).format('YYYY-MM-DD HH:mm')} - ${dayjs(
-            activity.signEnd * 1000
-          ).format('YYYY-MM-DD HH:mm')}`,
-        },
-      ],
-      [
-        {
-          tag: 'text',
-          text: '报名链接: ',
-        },
-        {
-          tag: 'a',
-          text: '点击跳转',
-          href: activity.realSignUrl,
-        },
-      ],
-    ];
-  }
-
-  // TODO: 暂时不发飞书
-  // try {
-  //   const feishuSendMsgArr = await feishuService.sendMessage({
-  //     title: '活动推荐',
-  //     content: [
-  //       [{ tag: 'at', user_id: 'all' }],
-  //       ...activities.reduce((result, activity, index) => {
-  //         if (index !== 0) return [...result, [], ...getActivitiesFeishuContent(activity)];
-  //         return [...result, ...getActivitiesFeishuContent(activity)];
-  //       }, [] as any[]),
-  //     ],
-  //   });
-
-  //   logger.daily.info('schedule job newset feishu send message res', feishuSendMsgArr);
-  // } catch (e) {
-  //   logger.error.error('schedule job newset feishu send message error', e);
-  // }
 
   try {
-    let message = '*活动推荐*\n\n';
-    message += activities.map(activity => getActivitiesTelegramText(activity)).join('\n\n');
+    const message = telegramService.getActivitiesTextByActivities(activities);
     const sendRes = await telegramService.sendMessage(message);
     logger.daily.info('schedule job newset res', sendRes);
   } catch (e) {

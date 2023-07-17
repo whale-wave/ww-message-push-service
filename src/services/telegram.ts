@@ -1,7 +1,8 @@
 import { GitMessageTemplate } from '../controllers';
 import axios, { AxiosInstance } from 'axios';
 import config from '../config';
-import { replaceStr } from '../utils';
+import { replaceStr, replaceStrNoKongGe } from '../utils';
+import dayjs from 'dayjs';
 
 type SendMessageApi = { chat_id: string; text: string; parse_mode?: 'MarkdownV2' | 'HTML' };
 type SendMessageApiResponse = {
@@ -13,6 +14,17 @@ type SendMessageApiResponse = {
     date: number;
     text: string;
   };
+};
+
+export type Activity = {
+  name: string;
+  address: string;
+  start: number;
+  end: number;
+  signStart: number;
+  signEnd: number;
+  url: string;
+  realSignUrl: string;
 };
 
 class TelegramService {
@@ -54,6 +66,7 @@ class TelegramService {
     return Promise.all(reqArr);
   }
 
+  // git 通知
   getGitTextByGitMessageTemplate(gitMessageTemplate: GitMessageTemplate) {
     return `*${replaceStr(gitMessageTemplate.type)}*
 *平台*: ${replaceStr(gitMessageTemplate.platform)}
@@ -66,6 +79,25 @@ ${gitMessageTemplate.commits
     return `[${replaceStr(commit.no)}](${replaceStr(commit.url)}) ${replaceStr(commit.note)}`;
   })
   .join('')}`;
+  }
+
+  // 活动推荐
+  getActivityTextByActivity(activity: Activity) {
+    return replaceStrNoKongGe(`活动名称: ${activity.name}
+活动地点: ${activity.address}
+活动时间: ${dayjs(activity.start * 1000).format('YYYY-MM-DD HH:mm')} - ${dayjs(activity.end * 1000).format(
+      'YYYY-MM-DD HH:mm'
+    )}
+活动链接: [点击跳转](${activity.url})
+报名时间: ${dayjs(activity.signStart * 1000).format('YYYY-MM-DD HH:mm')} - ${dayjs(activity.signEnd * 1000).format(
+      'YYYY-MM-DD HH:mm'
+    )}
+报名链接: [点击跳转](${activity.realSignUrl})`);
+  }
+  getActivitiesTextByActivities(activities: Activity[]) {
+    let message = '*活动推荐*\n\n';
+    message += activities.map(activity => this.getActivityTextByActivity(activity)).join('\n\n');
+    return message;
   }
 }
 
