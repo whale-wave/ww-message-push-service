@@ -7,10 +7,17 @@ Modify the contents of `src/config/config.ts`
 ```ts
 export default {
   port: 1234,
-  webhooks: {
-    feiShu: [
-      'xxxxxxx',
+  telegram: {
+    token: 'xxxx',
+    chatGroups: [
+      {
+        chatId: 'xxxxx',
+        replyToMessageId: 5,
+      },
     ],
+  },
+  webhooks: {
+    feiShu: ['xxxxxxx'],
   },
 };
 ```
