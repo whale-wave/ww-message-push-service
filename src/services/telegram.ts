@@ -4,7 +4,7 @@ import config from '../config';
 import { replaceStr, replaceStrNoKongGe } from '../utils';
 import dayjs from 'dayjs';
 
-type SendMessageApi = { chat_id: string; text: string; parse_mode?: 'MarkdownV2' | 'HTML' };
+type SendMessageApi = { chat_id: string; text: string; parse_mode?: 'MarkdownV2' | 'HTML'; reply_to_message_id?: number; };
 type SendMessageApiResponse = {
   ok: boolean;
   result: {
@@ -51,14 +51,16 @@ class TelegramService {
 
   async sendMessage(text: string) {
     const reqArr = config.telegram.list.reduce(
-      (arr, { token, chatIds }) => [
+      (arr, { token, chatGroups }) => [
         ...arr,
-        ...chatIds.map(chat_id => {
-          return this.sendMessageApi(token, {
-            chat_id,
+        ...chatGroups.map(({chatId, replyToMessageId}) => {
+          const data = {
+            chat_id: chatId,
             text,
             parse_mode: 'MarkdownV2',
-          });
+          } as SendMessageApi;
+          replyToMessageId && (data.reply_to_message_id = replyToMessageId)
+          return this.sendMessageApi(token, data);
         }),
       ],
       [] as Promise<SendMessageApiResponse>[]

@@ -15,9 +15,14 @@ export default {
     list: [
       // {
       //   token: '',
-      //   chatIds: [''],
+      //   chatGroups: [
+      //     {
+      //       chatId: '',
+      //       replyToMessageId: 5,
+      //     }
+      //   ],
       // },
-    ] as { token: string; chatIds: string[] }[],
+    ] as { token: string; chatGroups: { chatId: string; replyToMessageId?: number }[] }[],
   },
   webhooks: {
     feiShu: [],
