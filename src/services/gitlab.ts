@@ -9,7 +9,7 @@ class GitlabService {
   }
 
   public getType(object_kind: string, after: string): string {
-    return this.kindToTitleMap[object_kind] || (this.isDelete(after) ? '删除' : object_kind);
+    return this.kindToTitleMap[object_kind] || (this.isDelete(after) ? '删除分支' : object_kind);
   }
 }
 
