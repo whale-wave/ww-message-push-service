@@ -1,4 +1,4 @@
-import { telegramService, CodeupMessageRaw, codeupService, feishuService } from '../services';
+import {telegramService, CodeupMessageRaw, codeupService, feishuService, gitlabService} from '../services';
 import { Request, Response } from 'express';
 import { SuccessResponse, ErrorResponse, logger, toFeiShu, getFeiShuPostByTemplate, getGitText } from '../utils';
 import axios from 'axios';
@@ -6,16 +6,12 @@ import config from '../config';
 
 class WebhookController {
   async gitlab(req: Request, res: Response) {
-    const { object_kind, ref, user_name, user_username, project, commits } = req.body;
-    const kindToTitle = {
-      push: '推送commit',
-      tag_push: '推送标签',
-    } as any;
+    const { object_kind, after, ref, user_name, user_username, project, commits } = req.body;
 
     await telegramService.sendMessage(
       getGitText({
         data: {
-          type: kindToTitle[object_kind] || object_kind,
+          type: gitlabService.getType(object_kind, after),
           platform: 'gitlab',
           repo: {
             url: project.web_url,
@@ -39,7 +35,7 @@ class WebhookController {
 
     const result = toFeiShu(
       {
-        title: kindToTitle[object_kind] || object_kind,
+        title: gitlabService.getType(object_kind, after),
         user_name,
         user_username,
         project: {
