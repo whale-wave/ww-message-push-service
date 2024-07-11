@@ -11,7 +11,7 @@ class WebhookController {
     await telegramService.sendMessage(
       getGitText({
         data: {
-          type: gitlabService.getType(object_kind, after),
+          type: gitlabService.getType(req.body),
           platform: 'gitlab',
           repo: {
             url: project.web_url,
@@ -35,7 +35,7 @@ class WebhookController {
 
     const result = toFeiShu(
       {
-        title: gitlabService.getType(object_kind, after),
+        title: gitlabService.getType(req.body),
         user_name,
         user_username,
         project: {
